@@ -40,5 +40,4 @@ public class Aria2Manager {
     }
 
 
-
 }
