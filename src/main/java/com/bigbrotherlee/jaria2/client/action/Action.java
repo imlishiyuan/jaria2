@@ -14,7 +14,7 @@ public abstract class Action<T extends Action.ActionResponse>{
         return actionName;
     }
 
-    abstract String toJsonString();
+    public abstract String toJsonString();
 
     /**
      * 定义rpc请求的响应
