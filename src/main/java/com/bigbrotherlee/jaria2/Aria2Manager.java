@@ -1,6 +1,8 @@
 package com.bigbrotherlee.jaria2;
 
 import com.bigbrotherlee.jaria2.exception.StatusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -15,6 +17,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author lee
  */
 public class Aria2Manager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Aria2Manager.class);
     private final String path;
     private final String[] args;
 
@@ -26,7 +30,7 @@ public class Aria2Manager {
     private Aria2Manager(String path,String[] args){
         if(path == null){
             status.compareAndSet(Status.READY,Status.ERROR);
-            throw new IllegalArgumentException("path can not be null");
+            throw new StatusException("path can not be null");
         }
         this.path = path;
         this.args = args;
@@ -101,7 +105,10 @@ public class Aria2Manager {
         status.compareAndSet(Status.STARTED,Status.STOP);
     }
 
-
+    /**
+     * save process info
+     * @author lee
+     */
     public class ProcessInfo {
         private final String path;
         private final String[] args;

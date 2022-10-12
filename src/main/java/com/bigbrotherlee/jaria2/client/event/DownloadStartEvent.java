@@ -1,4 +1,4 @@
-package com.bigbrotherlee.jaria2.client.notification;
+package com.bigbrotherlee.jaria2.client.event;
 
 import com.bigbrotherlee.jaria2.client.enums.EventEnum;
 

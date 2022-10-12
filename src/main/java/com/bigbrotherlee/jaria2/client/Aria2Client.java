@@ -1,9 +1,17 @@
 package com.bigbrotherlee.jaria2.client;
 
 import com.bigbrotherlee.jaria2.client.action.Action;
-import com.bigbrotherlee.jaria2.client.notification.Event;
+import com.bigbrotherlee.jaria2.client.event.process.EventProcessor;
+import com.bigbrotherlee.jaria2.exception.Aria2ActionException;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 public interface Aria2Client {
+
+    Map<String, CompletableFuture<String>> CACHE = new ConcurrentHashMap<>(128);
 
     /**
      * 连接服务
@@ -21,6 +29,10 @@ public interface Aria2Client {
      */
     String getToken();
 
+    void addEventProcessor(EventProcessor eventProcessor);
+
+    void addEventProcessors(EventProcessor... eventProcessor);
+
     /**
      * 调用aria2c
      * @param action
@@ -28,7 +40,7 @@ public interface Aria2Client {
      * @param <R>
      * @param <T>
      */
-    <R extends Action.ActionResponse,T extends Action<R>> R action(T action);
+    <R extends Action.ActionResponse,T extends Action<R>> R action(T action) throws Aria2ActionException;
 
     public static enum ConnectStatus{
         /**
