@@ -6,6 +6,8 @@ import com.bigbrotherlee.jaria2.client.handler.Aria2ActionSendHandler;
 import com.bigbrotherlee.jaria2.client.handler.Aria2HandshakeHandler;
 import com.bigbrotherlee.jaria2.client.handler.Aria2HeartbeatSendHandler;
 import com.bigbrotherlee.jaria2.client.handler.Aria2MessageHandler;
+import com.bigbrotherlee.jaria2.config.Aria2AddressPort;
+import com.bigbrotherlee.jaria2.config.Aria2Config;
 import com.bigbrotherlee.jaria2.exception.Aria2ActionException;
 import com.bigbrotherlee.jaria2.exception.StatusException;
 import io.netty.bootstrap.Bootstrap;
@@ -30,6 +32,7 @@ import javax.net.ssl.SSLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -43,28 +46,43 @@ import java.util.concurrent.atomic.AtomicReference;
 public class DefaultAria2Client implements Aria2Client{
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAria2Client.class);
 
-    private final AddressPort addressPort;
+    private static final long ZERO = 0L;
+    private static final int HTTP_MAX_CONTENT_LENGTH = 8192;
+
+    private final Aria2Config aria2Config;
 
     private final AtomicReference<ConnectStatus> state;
-
-    private final String token;
 
     private final List<EventProcessor> processor = new ArrayList<>();
 
     private Connector connector;
 
     public DefaultAria2Client(String token){
-        this("localhost",6800,token,false);
+        this(Aria2Config.Client.DEFAULT_ADDRESS,Aria2Config.Client.DEFAULT_PORT,token,Aria2Config.Client.DEFAULT_USE_SSL);
     }
 
     public DefaultAria2Client(String address, int port,String token,boolean useSSL) {
-        this.addressPort = new AddressPort(address,port,useSSL);
-        this.token = token;
+        Aria2Config aria2Config = new Aria2Config();
+        Aria2Config.Client client = new Aria2Config.Client();
+        client.setAddress(address);
+        client.setPort(port);
+        client.setToken(token);
+        aria2Config.setClient(client);
+        this.aria2Config = aria2Config;
+        state = new AtomicReference<>(ConnectStatus.READY);
+    }
+
+    public DefaultAria2Client(Aria2Config config){
+        if(Objects.isNull(config) || Objects.isNull(config.getClient())){
+            throw new IllegalArgumentException("config or client can not be null");
+        }
+        this.aria2Config = config;
         state = new AtomicReference<>(ConnectStatus.READY);
     }
 
     @Override
     public void connect() throws InterruptedException{
+        Aria2AddressPort addressPort = aria2Config.getClient().buildAria2AddressPort();
         ConnectStatus connectStatus = state.get();
         if(connectStatus != ConnectStatus.READY)
             throw new StatusException("client not ready");
@@ -94,9 +112,9 @@ public class DefaultAria2Client implements Aria2Client{
                         }
                         pipeline
                                 .addLast("Aria2_Logger",loggingHandler)
-                                .addLast("Aria2_IdleStateHandler",new IdleStateHandler(0,3,0))
+                                .addLast("Aria2_IdleStateHandler",new IdleStateHandler(ZERO,aria2Config.getClient().getHeartbeatInterval(),ZERO,TimeUnit.SECONDS))
                                 .addLast("Aria2_HttpClientCodec",new HttpClientCodec())
-                                .addLast("Aria2_HttpObjectAggregator",new HttpObjectAggregator(8192))
+                                .addLast("Aria2_HttpObjectAggregator",new HttpObjectAggregator(HTTP_MAX_CONTENT_LENGTH))
                                 .addLast(WebSocketClientCompressionHandler.INSTANCE)
                                 .addLast("Aria2HandshakeHandler",aria2HandshakeHandler)
                                 .addLast("Aria2MessageHandler", aria2MessageHandler)
@@ -129,12 +147,12 @@ public class DefaultAria2Client implements Aria2Client{
 
     @Override
     public String getToken() {
-        return token;
+        return aria2Config.getClient().getToken();
     }
 
     @Override
     public <R extends Action.ActionResponse,T extends Action<R>> R action(T action) throws Aria2ActionException {
-        if (state.get()!=ConnectStatus.CONNECTED)
+        if (state.get() != ConnectStatus.CONNECTED)
             throw new StatusException("client not connected");
         // 写数据
         connector.channel.writeAndFlush(action);
@@ -153,7 +171,7 @@ public class DefaultAria2Client implements Aria2Client{
 
     @Override
     public void addEventProcessor(EventProcessor eventProcessor) {
-        if (state == null)
+        if (Objects.isNull(state))
             throw new StatusException("client not active");
         connector.aria2MessageHandler.addEventProcessor(eventProcessor);
     }
@@ -163,41 +181,6 @@ public class DefaultAria2Client implements Aria2Client{
         if (state == null)
             throw new StatusException("client not active");
         connector.aria2MessageHandler.addEventProcessors(eventProcessor);
-    }
-
-    /**
-     * save address info
-     */
-    private class AddressPort{
-        final String address;
-        final int port;
-
-        final boolean useSSL;
-
-        private final static String SCHEMA = "ws://";
-
-        private final static String SCHEMA_SSL = "wss://";
-
-        private final static String PATH = "/jsonrpc";
-
-        private final URI uri;
-
-        AddressPort(String address,int port){
-            this(address,port,false);
-        }
-        AddressPort(String address,int port,boolean useSSL){
-            this.address = address;
-            this.port = port;
-            this.useSSL = useSSL;
-            String schema = useSSL ? SCHEMA_SSL : SCHEMA;
-            String uriStr = new StringBuilder(schema).append(address).append(":").append(port).append(PATH).toString();
-            this.uri = URI.create(uriStr);
-        }
-
-        public URI getUri(){
-            return uri;
-        }
-
     }
 
     /**
