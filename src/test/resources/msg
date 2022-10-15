@@ -1,0 +1,2 @@
+{"jsonrpc":"2.0","method":"aria2.onDownloadStart","params":[{"gid":"6a20f6b9d00a9f7d"}]}
+{"jsonrpc":"2.0","method":"aria2.onDownloadComplete","params":[{"gid":"6a20f6b9d00a9f7d"}]}

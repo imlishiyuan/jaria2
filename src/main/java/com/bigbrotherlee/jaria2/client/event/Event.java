@@ -1,12 +1,31 @@
 package com.bigbrotherlee.jaria2.client.event;
 
+import com.alibaba.fastjson.JSON;
+import com.bigbrotherlee.jaria2.client.enums.EventEnum;
+
 public abstract class Event {
-    private final String eventName;
-    protected Event(String eventName){
-        this.eventName = eventName;
+    private final EventEnum eventEnum;
+    protected Event(EventEnum eventEnum){
+        this.eventEnum = eventEnum;
     }
 
-    public String getEventName() {
-        return eventName;
+    public EventEnum getEventName() {
+        return eventEnum;
+    }
+
+    public String toJsonString(){
+        return JSON.toJSONString(this);
+    }
+
+    public static class EventContent{
+        private String gid;
+
+        public String getGid() {
+            return gid;
+        }
+
+        public void setGid(String gid) {
+            this.gid = gid;
+        }
     }
 }

@@ -63,6 +63,8 @@ public class Aria2Config {
         public static final String DEFAULT_ADDRESS = "localhost";
         public static final int DEFAULT_PORT = 6800;
         public static final int DEFAULT_INTERVAL = 3;
+
+        private static final long DEFAULT_TIMEOUT = 50000;
         public static final boolean DEFAULT_USE_SSL = false;
 
         private String address = DEFAULT_ADDRESS;
@@ -70,6 +72,8 @@ public class Aria2Config {
         private int port = DEFAULT_PORT;
 
         private boolean useSSL = DEFAULT_USE_SSL;
+
+        private long responseTimeout = DEFAULT_TIMEOUT;
 
         private String token;
 
@@ -110,6 +114,14 @@ public class Aria2Config {
 
         public void setToken(String token) {
             this.token = token;
+        }
+
+        public long getResponseTimeout() {
+            return responseTimeout;
+        }
+
+        public void setResponseTimeout(long responseTimeout) {
+            this.responseTimeout = responseTimeout;
         }
 
         public void setHeartbeatInterval(long heartbeatInterval) {

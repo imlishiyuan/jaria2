@@ -2,13 +2,13 @@ package com.bigbrotherlee.jaria2.client.action;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import org.apache.commons.lang3.StringUtils;
+
+import java.util.Objects;
 
 /**
  * 定义rpc请求动作
  */
 public abstract class Action<T extends Action.ActionResponse>{
-
     private String id;
 
     private String jsonrpc = "2.0";
@@ -44,6 +44,20 @@ public abstract class Action<T extends Action.ActionResponse>{
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setJsonrpc(String jsonrpc) {
+        this.jsonrpc = jsonrpc;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+     public void setToken(String token) {}
+
     /**
      * 定义rpc请求的响应
      */
@@ -52,28 +66,19 @@ public abstract class Action<T extends Action.ActionResponse>{
         private String id;
 
         private String jsonrpc;
-        private String code;
-        private String message;
 
-        public String getCode() {
-            return code;
-        }
-
-        public void setCode(String code) {
-            this.code = code;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-
+        private Error error;
 
         public String getId() {
             return id;
+        }
+
+        public Error getError() {
+            return error;
+        }
+
+        public void setError(Error error) {
+            this.error = error;
         }
 
         public void setId(String id) {
@@ -93,7 +98,37 @@ public abstract class Action<T extends Action.ActionResponse>{
         }
 
         public boolean isSuccess(){
-            return StringUtils.isNotBlank(code);
+            return Objects.isNull(error);
+        }
+    }
+
+
+    public static class Error{
+        private Integer code;
+        private String message;
+
+        public int getCode() {
+            return code;
+        }
+
+        public void setCode(Integer code) {
+            this.code = code;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
+        @Override
+        public String toString() {
+            return "Error{" +
+                    "code=" + code +
+                    ", message='" + message + '\'' +
+                    '}';
         }
     }
 }

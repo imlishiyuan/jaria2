@@ -55,7 +55,7 @@ public class DefaultAria2Client implements Aria2Client{
 
     private final List<EventProcessor> processor = new ArrayList<>();
 
-    private Connector connector;
+    private volatile Connector connector;
 
     public DefaultAria2Client(String token){
         this(Aria2Config.Client.DEFAULT_ADDRESS,Aria2Config.Client.DEFAULT_PORT,token,Aria2Config.Client.DEFAULT_USE_SSL);
@@ -155,11 +155,12 @@ public class DefaultAria2Client implements Aria2Client{
         if (state.get() != ConnectStatus.CONNECTED)
             throw new StatusException("client not connected");
         // 写数据
+        action.setToken(aria2Config.getClient().getToken());
         connector.channel.writeAndFlush(action);
         CompletableFuture<String> response = new CompletableFuture<>();
         CACHE.put(action.getId(),response);
         try{
-            String actionResponseStr = response.get(5,TimeUnit.SECONDS);
+            String actionResponseStr = response.get(aria2Config.getClient().getResponseTimeout(),TimeUnit.SECONDS);
             return action.buildRespFromStr(actionResponseStr);
         }catch (ExecutionException | InterruptedException | TimeoutException e){
             LOGGER.error("call aria2 error . msg : "+e.getMessage());
@@ -173,7 +174,11 @@ public class DefaultAria2Client implements Aria2Client{
     public void addEventProcessor(EventProcessor eventProcessor) {
         if (Objects.isNull(state))
             throw new StatusException("client not active");
-        connector.aria2MessageHandler.addEventProcessor(eventProcessor);
+        if(Objects.isNull(connector)){
+            processor.add(eventProcessor);
+        }else {
+            connector.aria2MessageHandler.addEventProcessor(eventProcessor);
+        }
     }
 
     @Override

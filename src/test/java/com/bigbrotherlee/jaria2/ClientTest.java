@@ -2,6 +2,7 @@ package com.bigbrotherlee.jaria2;
 
 import com.bigbrotherlee.jaria2.client.Aria2Client;
 import com.bigbrotherlee.jaria2.client.DefaultAria2Client;
+import com.bigbrotherlee.jaria2.client.action.AddUriAction;
 import com.bigbrotherlee.jaria2.client.action.ListMethodsAction;
 import com.bigbrotherlee.jaria2.exception.Aria2ActionException;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,22 +20,19 @@ public class ClientTest {
 
     @Test
     public void handleEvent() throws InterruptedException, Aria2ActionException {
+        client.addEventProcessor(event->{
+            System.out.println(event.toJsonString());
+        });
         client.connect();
-        ListMethodsAction.ListMethodsActionResponse actionResponse = client.action(new ListMethodsAction(UUID.randomUUID().toString()));
-        client.disconnect();
-        client.connect();
-        System.out.println("---called---");
+        AddUriAction.AddUriActionResponse response = client.action(new AddUriAction(UUID.randomUUID().toString(),"https://desk-fd.zol-img.com.cn/t_s720x360c5/g7/M00/0A/0D/ChMkK2MoBA6IcIAaAAnmKLET1UwAAHq2wB4jO4ACeZA213.jpg"));
+        System.out.println("--event--");
     }
 
     @Test
-    public void doAction(){
-        try {
-            client.connect();
-            System.out.println("----");
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
+    public void doAction() throws Exception{
+        client.connect();
+        AddUriAction.AddUriActionResponse response = client.action(new AddUriAction(UUID.randomUUID().toString(),"https://desk-fd.zol-img.com.cn/t_s720x360c5/g7/M00/0A/0D/ChMkK2MoBA6IcIAaAAnmKLET1UwAAHq2wB4jO4ACeZA213.jpg"));
+        System.out.println("---called---");
     }
 
 }

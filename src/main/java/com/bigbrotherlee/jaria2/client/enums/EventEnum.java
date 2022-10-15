@@ -1,5 +1,7 @@
 package com.bigbrotherlee.jaria2.client.enums;
 
+import com.bigbrotherlee.jaria2.client.event.*;
+
 import java.util.Arrays;
 
 /**
@@ -26,7 +28,7 @@ public enum EventEnum {
      * The event is of type struct and it contains following keys. The value type is string.
      * 该通知将在下载开始时被发送。该事件的类型是结构，它包含以下键 gid。值类型为字符串。
      */
-    START("aria2.onDownloadStart","开始下载"),
+    START("aria2.onDownloadStart","开始下载", DownloadStartEvent.class),
 
     /**
      * This notification will be sent when a download is paused.
@@ -34,7 +36,7 @@ public enum EventEnum {
      * 当下载暂停时，该通知将被发送。
      * 该事件与aria2.onDownloadStart()方法的事件参数结构相同。
      */
-    PAUSE("aria2.onDownloadPause","下载暂停"),
+    PAUSE("aria2.onDownloadPause","下载暂停", DownloadPauseEvent.class),
 
     /**
      * This notification will be sent when a download is stopped by the user.
@@ -42,7 +44,7 @@ public enum EventEnum {
      * 当用户停止下载时，该通知将被发送。
      * 该事件与aria2.onDownloadStart()方法的事件参数结构相同。
      */
-    STOP("aria2.onDownloadStop","下载停止"),
+    STOP("aria2.onDownloadStop","下载停止", DownloadStopEvent.class),
     /**
      * This notification will be sent when a download is complete.
      * For BitTorrent downloads, this notification is sent when the download is complete and seeding is over.
@@ -51,7 +53,7 @@ public enum EventEnum {
      * 对于BitTorrent下载，该通知将在下载完成且播种结束时发送。
      * 该事件与aria2.onDownloadStart()方法的事件参数的结构相同。
      */
-    COMPLETE("aria2.onDownloadComplete","下载完成"),
+    COMPLETE("aria2.onDownloadComplete","下载完成", DownloadCompleteEvent.class),
 
     /**
      * This notification will be sent when a download is stopped due to an error.
@@ -59,7 +61,7 @@ public enum EventEnum {
      * 当下载因错误而停止时，该通知将被发送。
      * 该事件与aria2.onDownloadStart()方法的事件参数结构相同。
      */
-    ERROR("aria2.onDownloadError","下载错误"),
+    ERROR("aria2.onDownloadError","下载错误", DownloadErrorEvent.class),
 
     /**
      * This notification will be sent when a torrent download is complete but seeding is still going on.
@@ -67,9 +69,9 @@ public enum EventEnum {
      * 当种子下载完成但播种仍在进行时，将发送此通知。
      * 该事件与 aria2.onDownloadStart() 方法的事件参数是相同的结构
      */
-    BT_COMPLETE("aria2.onBtDownloadComplete","种子下载完成"),
+    BT_COMPLETE("aria2.onBtDownloadComplete","种子下载完成", BtDownloadCompleteEvent.class),
 
-    OTHER("#other","其他通知"),
+    OTHER("#other","其他通知", OtherEvent.class),
 
     ;
 
@@ -77,9 +79,12 @@ public enum EventEnum {
     public final String name;
     public final String description;
 
-    EventEnum(String name,String description){
+    public Class<?> eventClass;
+
+    <T extends Event> EventEnum(String name,String description,Class<T> eventClass){
         this.name = name;
         this.description = description;
+        this.eventClass = eventClass;
     }
 
     public static final EventEnum parseByName(String name){
