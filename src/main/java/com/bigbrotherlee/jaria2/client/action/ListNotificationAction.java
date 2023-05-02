@@ -24,15 +24,5 @@ public class ListNotificationAction extends Action<ListNotificationAction.ListNo
     /**
      * 定义rpc请求的响应
      */
-    public static class ListNotificationActionResponse extends ActionResponse{
-        private List<String> result;
-
-        public void setResult(List<String> result) {
-            this.result = result;
-        }
-
-        public List<String> getResult() {
-            return result;
-        }
-    }
+    public static class ListNotificationActionResponse extends ActionResponse<List<String>>{ }
 }

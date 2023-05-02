@@ -16,7 +16,7 @@ public abstract class BaseAction<T extends Action.ActionResponse> extends Action
 
     public static final String TOKEN_PREFIX="token:";
 
-    private LinkedList<Object> params = new LinkedList<>();
+    private final LinkedList<Object> params = new LinkedList<>();
 
 
     protected BaseAction(String method, String id, String jsonrpc) {
@@ -33,6 +33,7 @@ public abstract class BaseAction<T extends Action.ActionResponse> extends Action
 
     @Override
     public void setToken(String token) {
+        super.setToken(token);
         params.addFirst(TOKEN_PREFIX+token);
     }
 }

@@ -36,7 +36,7 @@ public class Aria2HandshakeHandler extends SimpleChannelInboundHandler<FullHttpR
     @Override
     public void channelActive(ChannelHandlerContext ctx){
         webSocketClientHandshaker.handshake(ctx.channel());
-        LOGGER.debug("start websocket Handshake");
+        LOGGER.debug("start aria2 websocket Handshake");
     }
 
     @Override
@@ -49,9 +49,18 @@ public class Aria2HandshakeHandler extends SimpleChannelInboundHandler<FullHttpR
         if(!webSocketClientHandshaker.isHandshakeComplete()){
             webSocketClientHandshaker.finishHandshake(ctx.channel(),msg);
             LOGGER.debug("finishHandshake");
+            handshake.setSuccess();
         }
-        handshake.setSuccess();
+
         ctx.pipeline().remove(this);
-        LOGGER.info("websocket Handshake is finished");
+        LOGGER.info("aria2 websocket Handshake is finished");
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        handshake.setFailure(cause);
+        ctx.pipeline().remove(this);
+        LOGGER.info("aria2 websocket Handshake is Failure");
+        super.exceptionCaught(ctx, cause);
     }
 }

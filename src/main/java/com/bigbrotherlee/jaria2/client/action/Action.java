@@ -3,6 +3,7 @@ package com.bigbrotherlee.jaria2.client.action;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -61,13 +62,23 @@ public abstract class Action<T extends Action.ActionResponse>{
     /**
      * 定义rpc请求的响应
      */
-    public static abstract class ActionResponse{
+    public static abstract class ActionResponse<R>{
 
         private String id;
 
         private String jsonrpc;
 
         private Error error;
+
+        private R result;
+
+        public void setResult(R result) {
+            this.result = result;
+        }
+
+        public R getResult() {
+            return result;
+        }
 
         public String getId() {
             return id;

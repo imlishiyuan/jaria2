@@ -24,15 +24,5 @@ public class ListMethodsAction extends Action<ListMethodsAction.ListMethodsActio
     /**
      * 定义rpc请求的响应
      */
-    public static class ListMethodsActionResponse extends ActionResponse{
-        private List<String> result;
-
-        public void setResult(List<String> result) {
-            this.result = result;
-        }
-
-        public List<String> getResult() {
-            return result;
-        }
-    }
+    public static class ListMethodsActionResponse extends ActionResponse<List<String>>{ }
 }

@@ -1,5 +1,6 @@
 package com.bigbrotherlee.jaria2.client;
 
+import com.bigbrotherlee.jaria2.Aria2Manager;
 import com.bigbrotherlee.jaria2.client.action.Action;
 import com.bigbrotherlee.jaria2.client.event.process.EventProcessor;
 import com.bigbrotherlee.jaria2.client.handler.Aria2ActionSendHandler;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -101,6 +103,10 @@ public class DefaultAria2Client implements Aria2Client{
         bootstrap
                 .group(workerGroup)
                 .option(ChannelOption.SO_KEEPALIVE,true)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
+                        Long.valueOf(
+                                Aria2Config.Client.DEFAULT_TIME_UNIT.toMillis(aria2Config.getClient().getConnectTimeout())
+                        ).intValue())
                 .channel(NioSocketChannel.class)
                 .handler(loggingHandler)
                 .handler(new ChannelInitializer<SocketChannel>() {
@@ -112,7 +118,7 @@ public class DefaultAria2Client implements Aria2Client{
                         }
                         pipeline
                                 .addLast("Aria2_Logger",loggingHandler)
-                                .addLast("Aria2_IdleStateHandler",new IdleStateHandler(ZERO,aria2Config.getClient().getHeartbeatInterval(),ZERO,TimeUnit.SECONDS))
+                                .addLast("Aria2_IdleStateHandler",new IdleStateHandler(aria2Config.getClient().getResponseTimeout(),aria2Config.getClient().getHeartbeatInterval(),ZERO,Aria2Config.Client.DEFAULT_TIME_UNIT))
                                 .addLast("Aria2_HttpClientCodec",new HttpClientCodec())
                                 .addLast("Aria2_HttpObjectAggregator",new HttpObjectAggregator(HTTP_MAX_CONTENT_LENGTH))
                                 .addLast(WebSocketClientCompressionHandler.INSTANCE)
@@ -126,11 +132,20 @@ public class DefaultAria2Client implements Aria2Client{
         processor.clear();
         Channel channel = bootstrap.connect(addressPort.address, addressPort.port).sync().channel();
         // 连接
-        this.connector = new Connector(bootstrap,workerGroup,aria2HandshakeHandler, aria2MessageHandler,channel);
+        this.connector = new Connector(bootstrap, workerGroup, aria2HandshakeHandler, aria2MessageHandler, channel);
 
         if(aria2HandshakeHandler.getHandshake().sync().isSuccess()){
             state.compareAndSet(ConnectStatus.READY,ConnectStatus.CONNECTED);
+            LOGGER.info("connect to {} success",addressPort.getUri());
         }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            try {
+                disconnect();
+            } catch (InterruptedException e) {
+                LOGGER.error(e.getMessage(),e);
+            }
+        }));
     }
 
     @Override
@@ -183,21 +198,26 @@ public class DefaultAria2Client implements Aria2Client{
 
     @Override
     public void addEventProcessors(EventProcessor... eventProcessor) {
-        if (state == null)
+        if (Objects.isNull(state))
             throw new StatusException("client not active");
-        connector.aria2MessageHandler.addEventProcessors(eventProcessor);
+        if(Objects.isNull(connector)){
+            processor.addAll(Arrays.asList(eventProcessor));
+        }else {
+            connector.aria2MessageHandler.addEventProcessors(eventProcessor);
+        }
     }
 
     /**
      * save connector info
      */
-    private class Connector{
+    private static class Connector{
         final Bootstrap bootstrap;
         final EventLoopGroup workerGroup;
         final Channel channel;
         final Aria2HandshakeHandler aria2HandshakeHandler;
 
         final Aria2MessageHandler aria2MessageHandler;
+
         Connector(Bootstrap bootstrap, EventLoopGroup workerGroup, Aria2HandshakeHandler aria2HandshakeHandler, Aria2MessageHandler aria2MessageHandler,Channel channel){
             this.workerGroup = workerGroup;
             this.bootstrap = bootstrap;

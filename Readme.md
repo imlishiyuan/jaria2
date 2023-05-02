@@ -22,6 +22,7 @@ public static void main(String[]args){
         System.out.println(aria2Manager.status());
 }
 ```
+
 send action (客户端发送请求)
 ```java
 public static void main(String[]args){
@@ -63,11 +64,91 @@ EventProcessor
 
 Action
 
-### 协议
+
+### action and notification
+所有的action和notification的覆盖情况。
+
+#### notification(event)
+
+下面是所有的已经支持的事件回调，也就是通知，打钩是已经通过测试的。
+
+[ ] onDownloadStart
+
+[ ] onDownloadError
+
+[ ] onDownloadComplete
+
+[ ] onBtDownloadComplete
+
+[ ] onDownloadStop
+
+[ ] onDownloadPause
+
+#### action(methods)
+
+下面是所有的已经支持的方法，也就是动作，打钩是已经通过测试的。
+
+[x] listMethods 
+
+[x] listNotifications
+
+[x] pause
+
+[x] unpause
+
+[x] pauseAll
+
+[x] unpauseAll
+
+[x] getVersion
+
+[x] getSessionsInfo
+
+[x] tellStatus
+
+[x] tellWaiting
+
+[x] tellStopped
+
+[x] tellActive
+
+[x] addUri
+
+[x] addTorrent
+
+[x] addMetalink
+
+[x] getUris
+
+[x] getFiles
+
+[x] getPeers
+
+[x] getServers
+
+[x] ForcePause
+
+[x] ForcePauseAll
+
+[x] ForceRemove
+
+[x] ForceShutdown
+
+[x] Remove
+
+[x] Shutdown
+
+[x] SaveSession
+
+
+
+### 开源协议（待补充）
 
 ```text
 
 ```
+
+
 
 
 

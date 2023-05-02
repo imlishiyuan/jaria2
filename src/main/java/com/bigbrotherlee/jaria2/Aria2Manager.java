@@ -76,10 +76,17 @@ public class Aria2Manager {
                 }
             }
             process = Runtime.getRuntime().exec(command.toString(), null);
+
+            process.onExit().thenAccept(processNow -> {
+                status.set(Status.STOP);
+                processNow.destroy();
+            });
+
             Runtime.getRuntime().addShutdownHook(new Thread(()-> {
                 process.destroy();
                 status.set(Status.ERROR);
             }));
+
             LOGGER.info("aria2c manager started :" + status());
             status.compareAndSet(currentStatus,Status.STARTED);
         } catch (IOException e) {
@@ -104,7 +111,8 @@ public class Aria2Manager {
                             processInfo.command().orElse(path),
                             processInfo.arguments().orElse(args),
                             processInfo.user().orElse(null),
-                            Status.ERROR,process.pid(),
+                            Status.ERROR,
+                            process.pid(),
                             LocalDateTime.ofInstant(processInfo.startInstant().orElse(Instant.now()), ZoneId.systemDefault())
                             );
                 }else {
@@ -118,7 +126,8 @@ public class Aria2Manager {
                         processInfo.command().orElse(path),
                         processInfo.arguments().orElse(args),
                         processInfo.user().orElse(null),
-                        Status.ERROR,process.pid(),
+                        Status.STARTED,
+                        process.pid(),
                         LocalDateTime.ofInstant(processInfo.startInstant().orElse(Instant.now()), ZoneId.systemDefault())
                 );
                 break;

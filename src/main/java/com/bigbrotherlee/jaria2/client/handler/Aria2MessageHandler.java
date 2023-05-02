@@ -23,7 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Aria2MessageHandler extends MessageToMessageDecoder<WebSocketFrame> {
 
-    private List<EventProcessor> eventProcessors = new CopyOnWriteArrayList<>();
+    private final List<EventProcessor> eventProcessors = new CopyOnWriteArrayList<>();
 
     private static final String ID_KEY = "id";
 
@@ -72,11 +72,15 @@ public class Aria2MessageHandler extends MessageToMessageDecoder<WebSocketFrame>
             CompletableFuture<String> stringCompletableFuture = Aria2Client.CACHE.get(id);
             if(Objects.nonNull(stringCompletableFuture)){
                 stringCompletableFuture.complete(text);
+            } else if (Aria2HeartbeatSendHandler.DEFAULT_ACTION_ID.equals(id)) {
+                LOGGER.debug("receive heartbeat message");
             }
         }else if(webSocketFrame instanceof CloseWebSocketFrame){
             ctx.close();
         }
     }
+
+
 
 
     public static Aria2MessageHandler newInstance() {

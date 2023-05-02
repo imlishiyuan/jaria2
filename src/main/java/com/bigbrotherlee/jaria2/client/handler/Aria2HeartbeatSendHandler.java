@@ -16,16 +16,17 @@ import org.slf4j.LoggerFactory;
 @ChannelHandler.Sharable
 public class Aria2HeartbeatSendHandler extends ChannelDuplexHandler {
 
-    private static final String DEFAULT_ACTION_ID = "-1";
+    public static final String DEFAULT_ACTION_ID = "heartbeat";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Aria2HeartbeatSendHandler.class);
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-        if(evt == IdleStateEvent.FIRST_WRITER_IDLE_STATE_EVENT){
+        if(evt == IdleStateEvent.FIRST_WRITER_IDLE_STATE_EVENT && ctx.channel().isActive()){
             // send heartbeat
             ctx.writeAndFlush(new ListNotificationAction(DEFAULT_ACTION_ID));
             LOGGER.debug("send heartbeat message");
         }
     }
+
 }

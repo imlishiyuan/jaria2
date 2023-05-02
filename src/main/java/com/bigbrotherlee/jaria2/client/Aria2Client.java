@@ -41,8 +41,7 @@ public interface Aria2Client {
      * @param <T>
      */
     <R extends Action.ActionResponse,T extends Action<R>> R action(T action) throws Aria2ActionException;
-
-    public static enum ConnectStatus{
+    enum ConnectStatus{
         /**
          * 初始化完成，已经准备好连接但是还未连接
          * 调用构造器 | 调用disconnect
