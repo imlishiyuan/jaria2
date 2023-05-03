@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import cn.lishiyuan.jaria2.client.enums.ActionEnum;
 
 /**
- * List all support notification (event)
+ * pause all download task
  * @author lee
  */
 public class PauseAllAction extends BaseAction<PauseAllAction.PauseAllActionResponse>{

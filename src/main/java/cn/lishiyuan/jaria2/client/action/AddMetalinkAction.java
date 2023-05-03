@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import java.util.*;
 
 /**
- * List all support notification (event)
+ * add metalink
  * @author lee
  */
 public class AddMetalinkAction extends BaseAction<AddMetalinkAction.AddMetalinkActionResponse>{

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * List all support notification (event)
+ * tell waiting download
  * @author lee
  */
 public class TellWaitingAction extends BaseAction<TellWaitingAction.TellWaitingActionResponse>{

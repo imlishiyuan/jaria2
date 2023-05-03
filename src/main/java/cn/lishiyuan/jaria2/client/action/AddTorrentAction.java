@@ -11,7 +11,7 @@ import java.nio.file.Files;
 import java.util.*;
 
 /**
- * List all support notification (event)
+ * add torrent
  * @author lee
  */
 public class AddTorrentAction extends BaseAction<AddTorrentAction.AddTorrentActionResponse>{

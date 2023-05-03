@@ -8,7 +8,7 @@ import com.alibaba.fastjson.JSON;
 import java.util.Objects;
 
 /**
- * List all support notification (event)
+ * get option of a download
  * @author lee
  */
 public class GetOptionAction extends BaseAction<GetOptionAction.GetOptionActionResponse>{

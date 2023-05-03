@@ -5,7 +5,7 @@ import cn.lishiyuan.jaria2.client.enums.ActionEnum;
 import com.alibaba.fastjson.JSON;
 
 /**
- * List all support notification (event)
+ * get global options
  * @author lee
  */
 public class GetGlobalOptionAction extends BaseAction<GetGlobalOptionAction.GetGlobalOptionActionResponse>{

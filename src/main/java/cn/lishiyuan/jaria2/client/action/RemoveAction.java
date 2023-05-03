@@ -7,7 +7,7 @@ import cn.lishiyuan.jaria2.exception.Aria2ActionException;
 import java.util.Objects;
 
 /**
- * List all support notification (event)
+ * remove a download
  * @author lee
  */
 public class RemoveAction extends BaseAction<RemoveAction.RemoveActionResponse>{

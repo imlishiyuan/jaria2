@@ -4,7 +4,7 @@ import cn.lishiyuan.jaria2.client.enums.ActionEnum;
 import com.alibaba.fastjson.JSON;
 
 /**
- * List all support notification (event)
+ * force shutdown aria2
  * @author lee
  */
 public class ForceShutdownAction extends BaseAction<ForceShutdownAction.ForceShutdownActionResponse>{

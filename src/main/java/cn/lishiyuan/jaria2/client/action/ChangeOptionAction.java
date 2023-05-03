@@ -7,7 +7,7 @@ import com.alibaba.fastjson.JSON;
 import java.util.*;
 
 /**
- * List all support notification (event)
+ * change option of a download
  * @author lee
  */
 public class ChangeOptionAction extends BaseAction<ChangeOptionAction.ChangeOptionActionResponse>{

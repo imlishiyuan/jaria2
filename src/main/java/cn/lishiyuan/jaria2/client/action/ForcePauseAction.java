@@ -7,7 +7,7 @@ import cn.lishiyuan.jaria2.exception.Aria2ActionException;
 import java.util.Objects;
 
 /**
- * List all support notification (event)
+ * force pause a download
  * @author lee
  */
 public class ForcePauseAction extends BaseAction<ForcePauseAction.ForcePauseActionResponse>{

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * List all support notification (event)
+ * get peers of a download
  * @author lee
  */
 public class GetPeersAction extends BaseAction<GetPeersAction.GetPeersActionResponse>{

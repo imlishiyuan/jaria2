@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * List all support notification (event)
+ * change uri of a download item
  * @author lee
  */
 public class ChangeUriAction extends BaseAction<ChangeUriAction.ChangeUriActionResponse>{

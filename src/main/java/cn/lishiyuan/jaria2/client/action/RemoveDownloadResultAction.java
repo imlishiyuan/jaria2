@@ -7,7 +7,7 @@ import com.alibaba.fastjson.JSON;
 import java.util.Objects;
 
 /**
- * List all support notification (event)
+ * remove a download result
  * @author lee
  */
 public class RemoveDownloadResultAction extends BaseAction<RemoveDownloadResultAction.RemoveDownloadResultActionResponse>{

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * List all support notification (event)
+ * tell status of a download
  * @author lee
  */
 public class TellStatusAction extends BaseAction<TellStatusAction.TellStatusResponse>{

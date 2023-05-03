@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * List all support notification (event)
+ * get global options
  * @author lee
  */
 public class GetGlobalStatAction extends BaseAction<GetGlobalStatAction.GetGlobalStatActionResponse>{

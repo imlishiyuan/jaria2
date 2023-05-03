@@ -4,7 +4,7 @@ import cn.lishiyuan.jaria2.client.enums.ActionEnum;
 import com.alibaba.fastjson.JSON;
 
 /**
- * List all support notification (event)
+ * purge download result
  * @author lee
  */
 public class PurgeDownloadResultAction extends BaseAction<PurgeDownloadResultAction.PurgeDownloadResultActionResponse>{

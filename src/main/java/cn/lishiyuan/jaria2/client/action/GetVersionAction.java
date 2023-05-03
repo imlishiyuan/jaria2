@@ -8,7 +8,7 @@ import lombok.Setter;
 import java.util.List;
 
 /**
- * List all support notification (event)
+ * get version of aria2 server
  * @author lee
  */
 public class GetVersionAction extends BaseAction<GetVersionAction.GetVersionActionResponse>{

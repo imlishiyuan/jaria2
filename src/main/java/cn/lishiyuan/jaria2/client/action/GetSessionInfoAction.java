@@ -4,7 +4,7 @@ import cn.lishiyuan.jaria2.client.enums.ActionEnum;
 import com.alibaba.fastjson.JSON;
 
 /**
- * List all support notification (event)
+ * get Session Info
  * @author lee
  */
 public class GetSessionInfoAction extends BaseAction<GetSessionInfoAction.GetSessionInfoActionResponse>{

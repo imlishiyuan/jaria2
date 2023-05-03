@@ -7,7 +7,7 @@ import cn.lishiyuan.jaria2.exception.Aria2ActionException;
 import java.util.*;
 
 /**
- * List all support notification (event)
+ * add uri to aria2
  * @author lee
  */
 public class AddUriAction extends BaseAction<AddUriAction.AddUriActionResponse>{

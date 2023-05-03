@@ -7,7 +7,7 @@ import cn.lishiyuan.jaria2.exception.Aria2ActionException;
 import java.util.Objects;
 
 /**
- * List all support notification (event)
+ * force remove a download
  * @author lee
  */
 public class ForceRemoveAction extends BaseAction<ForceRemoveAction.ForceRemoveActionResponse>{

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * List all support notification (event)
+ * tell stopped download
  * @author lee
  */
 public class TellStoppedAction extends BaseAction<TellStoppedAction.TellStoppedActionResponse>{

@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * List all support notification (event)
+ * abstract base action , all action must extends this class
  * @author lee
  */
 public abstract class BaseAction<T extends Action.ActionResponse> extends Action<T>{

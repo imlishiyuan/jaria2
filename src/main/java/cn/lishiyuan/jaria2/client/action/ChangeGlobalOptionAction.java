@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * List all support notification (event)
+ * change global option
  * @author lee
  */
 public class ChangeGlobalOptionAction extends BaseAction<ChangeGlobalOptionAction.ChangeGlobalOptionActionResponse>{
