@@ -4,9 +4,8 @@ import com.alibaba.fastjson.JSON;
 import cn.lishiyuan.jaria2.client.enums.ActionEnum;
 import cn.lishiyuan.jaria2.exception.Aria2ActionException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -61,8 +60,8 @@ public class AddMetalinkAction extends BaseAction<AddMetalinkAction.AddMetalinkA
         if(Objects.isNull(metalink) || !metalink.exists() || !metalink.isFile()){
             throw new Aria2ActionException("metalink is empty or null");
         }
-        try(FileInputStream fileInputStream = new FileInputStream(metalink)){
-            byte[] bytes = fileInputStream.readAllBytes();
+        try{
+            byte[] bytes = Files.readAllBytes(metalink.toPath());
             this.metalink = new String(Base64.getEncoder().encode(bytes));
             getParams().add(this.metalink);
             getParams().add(options);

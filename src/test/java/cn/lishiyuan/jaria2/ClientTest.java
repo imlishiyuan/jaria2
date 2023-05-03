@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class ClientTest {
@@ -585,7 +586,9 @@ public class ClientTest {
 
     @Test
     public void testOptions() throws IOException {
-        String str = Files.readString(Path.of("/home/lee/IdeaProjects/jaria2/src/main/resources/aria2.conf"));
+        byte[] bytes = Files.readAllBytes(Paths.get("/home/lee/IdeaProjects/jaria2/src/main/resources/aria2.conf"));
+
+        String str = new String(bytes);
 
         List<Option> options = JSON.parseArray(str.toString(), Option.class);
         for (Option option : options) {

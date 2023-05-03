@@ -7,6 +7,7 @@ import cn.lishiyuan.jaria2.exception.Aria2ActionException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -49,8 +50,8 @@ public class AddTorrentAction extends BaseAction<AddTorrentAction.AddTorrentActi
         if(Objects.isNull(torrent) || !torrent.exists() || !torrent.isFile()){
             throw new Aria2ActionException("torrent is empty or null");
         }
-        try(FileInputStream fileInputStream = new FileInputStream(torrent)){
-            byte[] bytes = fileInputStream.readAllBytes();
+        try{
+            byte[] bytes = Files.readAllBytes(torrent.toPath());
             String realTorrent = new String(Base64.getEncoder().encode(bytes));
             this.torrent = realTorrent;
             getParams().add(this.torrent);
