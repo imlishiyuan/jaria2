@@ -6,12 +6,31 @@
 
     <groupId>cn.lishiyuan</groupId>
     <artifactId>jaria2</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
+
+    <packaging>jar</packaging>
+
+    <name>jaria2</name>
+    <description>jaria2 is a java client for aria2c</description>
+
+    <developers>
+        <developer>
+            <name>lishiyuan</name>
+            <email>me@lishiyuan.cn</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/imlishiyuan/jaria2.git</connection>
+        <developerConnection>scm:git:ssh://github.com:imlishiyuan/jaria2.git</developerConnection>
+        <url>http://github.com/imlishiyuan/jaria2/tree/main</url>
+    </scm>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <gpg.keyname>0x99B8BFD2</gpg.keyname>
     </properties>
 
     <dependencyManagement>
@@ -64,6 +83,18 @@
         </dependency>
     </dependencies>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+
     <build>
         <pluginManagement>
             <plugins>
@@ -101,18 +132,6 @@
                         </execution>
                     </executions>
                 </plugin>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <configuration>
-                        <excludes>
-                            <exclude>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok</artifactId>
-                            </exclude>
-                        </excludes>
-                    </configuration>
-                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -127,6 +146,23 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                        <configuration>
+                            <keyname>${gpg.keyname}</keyname>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
