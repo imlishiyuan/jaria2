@@ -12,6 +12,7 @@
 
     <name>jaria2</name>
     <description>jaria2 is a java client for aria2c</description>
+    <url>ttp://github.com/imlishiyuan/jaria2</url>
 
     <developers>
         <developer>
@@ -25,6 +26,13 @@
         <developerConnection>scm:git:ssh://github.com:imlishiyuan/jaria2.git</developerConnection>
         <url>http://github.com/imlishiyuan/jaria2/tree/main</url>
     </scm>
+
+    <licenses>
+        <license>
+            <name>Wait Add It</name>
+            <distribution>Wait Add It</distribution>
+        </license>
+    </licenses>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
