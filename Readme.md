@@ -6,9 +6,9 @@ add maven dependency（引入maven依赖）
 
 ```xml
 <dependency>
-    <groupId>com.bigbrotherlee</groupId>
+    <groupId>cn.liganma</groupId>
     <artifactId>jaria2</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
@@ -72,17 +72,17 @@ Action
 
 下面是所有的已经支持的事件回调，也就是通知，打钩是已经通过测试的。
 
-[ ] onDownloadStart
+[x] onDownloadStart
 
-[ ] onDownloadError
+[x] onDownloadError
 
-[ ] onDownloadComplete
+[x] onDownloadComplete
 
 [ ] onBtDownloadComplete
 
-[ ] onDownloadStop
+[x] onDownloadStop
 
-[ ] onDownloadPause
+[x] onDownloadPause
 
 #### action(methods)
 
@@ -140,11 +140,30 @@ Action
 
 [x] SaveSession
 
+[x] ChangePosition
+
+[x] ChangeUri
+
+[x] PurgeDownloadResult
+
+[x] RemoveDownloadResult
+
+[x] ChangeGlobalOption
+
+[x] ChangeOption
+
+[x] Multicall
+
+[x] GetOption
+
+[x] GetGlobalOption
+
 
 
 ### 开源协议（待补充）
 
 ```text
+李干嘛大帅哥
 
 ```
 
