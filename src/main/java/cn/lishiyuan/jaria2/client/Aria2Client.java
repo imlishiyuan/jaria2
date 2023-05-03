@@ -1,6 +1,7 @@
 package cn.lishiyuan.jaria2.client;
 
 import cn.lishiyuan.jaria2.client.action.Action;
+import cn.lishiyuan.jaria2.client.action.ActionResponse;
 import cn.lishiyuan.jaria2.client.event.process.EventProcessor;
 import cn.lishiyuan.jaria2.exception.Aria2ActionException;
 
@@ -39,7 +40,7 @@ public interface Aria2Client {
      * @param <R>
      * @param <T>
      */
-    <R extends Action.ActionResponse,T extends Action<R>> R action(T action) throws Aria2ActionException;
+    <R extends ActionResponse,T extends Action<R>> R action(T action) throws Aria2ActionException;
     enum ConnectStatus{
         /**
          * 初始化完成，已经准备好连接但是还未连接

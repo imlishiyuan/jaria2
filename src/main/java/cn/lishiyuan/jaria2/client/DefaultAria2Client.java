@@ -1,6 +1,7 @@
 package cn.lishiyuan.jaria2.client;
 
 import cn.lishiyuan.jaria2.client.action.Action;
+import cn.lishiyuan.jaria2.client.action.ActionResponse;
 import cn.lishiyuan.jaria2.client.event.process.EventProcessor;
 import cn.lishiyuan.jaria2.client.handler.Aria2ActionSendHandler;
 import cn.lishiyuan.jaria2.client.handler.Aria2HandshakeHandler;
@@ -126,7 +127,7 @@ public class DefaultAria2Client implements Aria2Client{
                                 .addLast("Aria2HeartbeatHandler", aria2HeartbeatSendHandler);
                     }
                 });
-        aria2MessageHandler.addEventProcessors(processor.toArray(EventProcessor[]::new));
+        aria2MessageHandler.addEventProcessors(processor);
         processor.clear();
         Channel channel = bootstrap.connect(addressPort.address, addressPort.port).sync().channel();
         // 连接
@@ -164,7 +165,7 @@ public class DefaultAria2Client implements Aria2Client{
     }
 
     @Override
-    public <R extends Action.ActionResponse,T extends Action<R>> R action(T action) throws Aria2ActionException {
+    public <R extends ActionResponse,T extends Action<R>> R action(T action) throws Aria2ActionException {
         if (state.get() != ConnectStatus.CONNECTED)
             throw new StatusException("client not connected");
         // 写数据

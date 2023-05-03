@@ -7,7 +7,7 @@ import java.util.List;
  * abstract base action , all action must extends this class
  * @author lee
  */
-public abstract class BaseAction<T extends Action.ActionResponse> extends Action<T>{
+public abstract class BaseAction<T extends ActionResponse> extends Action<T>{
 
     public static final String TOKEN_PREFIX="token:";
 
