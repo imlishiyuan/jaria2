@@ -81,6 +81,11 @@ public class Aria2Manager {
                 processNow.destroy();
             });
 
+            process.onExit().thenAccept(processNow -> {
+                status.set(Status.STOP);
+                processNow.destroy();
+            });
+
             Runtime.getRuntime().addShutdownHook(new Thread(()-> {
                 process.destroy();
                 status.set(Status.ERROR);
