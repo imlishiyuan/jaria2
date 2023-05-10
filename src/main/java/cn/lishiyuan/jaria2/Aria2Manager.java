@@ -77,6 +77,11 @@ public class Aria2Manager {
             }
             process = Runtime.getRuntime().exec(command.toString(), null);
 
+            process.onExit().thenAccept(processNow -> {
+                status.set(Status.STOP);
+                processNow.destroy();
+            });
+
             Runtime.getRuntime().addShutdownHook(new Thread(()-> {
                 process.destroy();
                 status.set(Status.ERROR);
@@ -101,27 +106,29 @@ public class Aria2Manager {
                 break;
             case ERROR:
                 if(process!=null){
+                    ProcessHandle.Info processInfo = process.info();
                     info = new ProcessInfo(
-                            path,
-                            args,
-                            null,
+                            processInfo.command().orElse(path),
+                            processInfo.arguments().orElse(args),
+                            processInfo.user().orElse(null),
                             Status.ERROR,
-                            null,
-                            LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault())
-                            );
+                            process.pid(),
+                            LocalDateTime.ofInstant(processInfo.startInstant().orElse(Instant.now()), ZoneId.systemDefault())
+                    );
                 }else {
                     info = new ProcessInfo(path, args,null,Status.ERROR,null,null);
                 }
                 break;
             case STOP:
             case STARTED:
+                ProcessHandle.Info processInfo = process.info();
                 info = new ProcessInfo(
-                        path,
-                        args,
-                        null,
+                        processInfo.command().orElse(path),
+                        processInfo.arguments().orElse(args),
+                        processInfo.user().orElse(null),
                         Status.STARTED,
-                        null,
-                        LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault())
+                        process.pid(),
+                        LocalDateTime.ofInstant(processInfo.startInstant().orElse(Instant.now()), ZoneId.systemDefault())
                 );
                 break;
         }

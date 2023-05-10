@@ -2,6 +2,8 @@
 
 ## jaria2 is a java client for aria2c (jaria2是一个aria2c的java客户端)
 
+**作者使用的是jdk11，考虑到市面上还是使用jdk8的居多，所以我把公开版本调整为jdk8，我个人使用jdk11版本。**
+
 ### quick start (快速开始)
 
 1. add maven dependency（引入maven依赖）
