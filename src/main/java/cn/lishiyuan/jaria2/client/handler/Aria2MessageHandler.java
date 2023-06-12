@@ -73,6 +73,9 @@ public class Aria2MessageHandler extends MessageToMessageDecoder<WebSocketFrame>
             }
         }else if(webSocketFrame instanceof CloseWebSocketFrame){
             ctx.close();
+            LOGGER.debug("receive close message");
+        }else if (webSocketFrame instanceof PongWebSocketFrame){
+            LOGGER.debug("receive pong message");
         }
     }
 

@@ -4,6 +4,7 @@ import cn.lishiyuan.jaria2.client.action.ListNotificationAction;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,7 @@ public class Aria2HeartbeatSendHandler extends ChannelDuplexHandler {
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
         if(evt == IdleStateEvent.FIRST_WRITER_IDLE_STATE_EVENT && ctx.channel().isActive()){
             // send heartbeat
-            ctx.writeAndFlush(new ListNotificationAction(DEFAULT_ACTION_ID));
+            ctx.writeAndFlush(new PingWebSocketFrame());
             LOGGER.debug("send heartbeat message");
         }
     }
