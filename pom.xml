@@ -6,13 +6,13 @@
 
     <groupId>cn.lishiyuan</groupId>
     <artifactId>jaria2</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.3</version>
 
     <packaging>jar</packaging>
 
     <name>jaria2</name>
     <description>jaria2 is a java client for aria2c</description>
-    <url>ttp://github.com/imlishiyuan/jaria2</url>
+    <url>https://github.com/imlishiyuan/jaria2</url>
 
     <developers>
         <developer>

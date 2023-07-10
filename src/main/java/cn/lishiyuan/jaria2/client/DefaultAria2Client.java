@@ -97,7 +97,8 @@ public class DefaultAria2Client implements Aria2Client{
         }
         Aria2HeartbeatSendHandler aria2HeartbeatSendHandler = new Aria2HeartbeatSendHandler();
         LoggingHandler loggingHandler = new LoggingHandler();
-        Aria2HandshakeHandler aria2HandshakeHandler = new Aria2HandshakeHandler(WebSocketClientHandshakerFactory.newHandshaker(addressPort.getUri(), WebSocketVersion.V13, null, true, new DefaultHttpHeaders()));
+        WebSocketClientHandshaker webSocketClientHandshaker = WebSocketClientHandshakerFactory.newHandshaker(addressPort.getUri(), WebSocketVersion.V13, null, true, new DefaultHttpHeaders(),65536,true,false,300_000);
+        Aria2HandshakeHandler aria2HandshakeHandler = new Aria2HandshakeHandler(webSocketClientHandshaker);
         Aria2MessageHandler aria2MessageHandler = Aria2MessageHandler.newInstance();
         bootstrap
                 .group(workerGroup)
@@ -153,6 +154,7 @@ public class DefaultAria2Client implements Aria2Client{
         if(connectStatus != ConnectStatus.CONNECTED)
             throw new StatusException("client not connected");
         // 断开连接操作
+        CACHE.clear();
         connector.workerGroup.shutdownGracefully().sync();
         processor.addAll(connector.aria2MessageHandler.getEventProcessors());
         connector = null;
