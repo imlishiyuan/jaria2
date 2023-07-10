@@ -30,14 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -45,6 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author lee
  */
 public class DefaultAria2Client implements Aria2Client{
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAria2Client.class);
 
     private static final long ZERO = 0L;
@@ -97,7 +92,9 @@ public class DefaultAria2Client implements Aria2Client{
         }
         Aria2HeartbeatSendHandler aria2HeartbeatSendHandler = new Aria2HeartbeatSendHandler();
         LoggingHandler loggingHandler = new LoggingHandler();
-        Aria2HandshakeHandler aria2HandshakeHandler = new Aria2HandshakeHandler(WebSocketClientHandshakerFactory.newHandshaker(addressPort.getUri(), WebSocketVersion.V13, null, true, new DefaultHttpHeaders()));
+        // WebSocketClientHandshaker 30s timeout
+        WebSocketClientHandshaker webSocketClientHandshaker = WebSocketClientHandshakerFactory.newHandshaker(addressPort.getUri(), WebSocketVersion.V13, null, true, new DefaultHttpHeaders(), 65536, true, false, 300_000);
+        Aria2HandshakeHandler aria2HandshakeHandler = new Aria2HandshakeHandler(webSocketClientHandshaker);
         Aria2MessageHandler aria2MessageHandler = Aria2MessageHandler.newInstance();
         bootstrap
                 .group(workerGroup)
@@ -140,7 +137,9 @@ public class DefaultAria2Client implements Aria2Client{
 
         Runtime.getRuntime().addShutdownHook(new Thread(()-> {
             try {
-                disconnect();
+                if (state.get() == ConnectStatus.CONNECTED){
+                    disconnect();
+                }
             } catch (InterruptedException e) {
                 LOGGER.error(e.getMessage(),e);
             }
@@ -155,6 +154,7 @@ public class DefaultAria2Client implements Aria2Client{
         // 断开连接操作
         connector.workerGroup.shutdownGracefully().sync();
         processor.addAll(connector.aria2MessageHandler.getEventProcessors());
+        CACHE.clear();
         connector = null;
         state.compareAndSet(ConnectStatus.CONNECTED,ConnectStatus.READY);
     }

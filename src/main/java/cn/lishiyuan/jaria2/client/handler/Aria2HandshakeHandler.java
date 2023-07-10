@@ -1,5 +1,6 @@
 package cn.lishiyuan.jaria2.client.handler;
 
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -35,7 +36,13 @@ public class Aria2HandshakeHandler extends SimpleChannelInboundHandler<FullHttpR
 
     @Override
     public void channelActive(ChannelHandlerContext ctx){
-        webSocketClientHandshaker.handshake(ctx.channel());
+        ChannelFuture channelFuture = webSocketClientHandshaker.handshake(ctx.channel());
+        channelFuture.addListener(future -> {
+            if(!future.isSuccess()){
+                LOGGER.debug("websocket handshake failure");
+                handshake.setFailure(future.cause());
+            }
+        });
         LOGGER.debug("start aria2 websocket Handshake");
     }
 
