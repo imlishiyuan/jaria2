@@ -6,12 +6,13 @@ import cn.lishiyuan.jaria2.client.event.process.EventProcessor;
 import cn.lishiyuan.jaria2.exception.Aria2ActionException;
 
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public interface Aria2Client {
 
-    Map<String, CompletableFuture<String>> CACHE = new ConcurrentHashMap<>(128);
+    Map<String, CompletableFuture<String>> CACHE = new WeakHashMap<>(128);
 
     /**
      * 连接服务

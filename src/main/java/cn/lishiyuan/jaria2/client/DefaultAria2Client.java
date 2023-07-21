@@ -93,8 +93,8 @@ public class DefaultAria2Client implements Aria2Client{
         Aria2HeartbeatSendHandler aria2HeartbeatSendHandler = new Aria2HeartbeatSendHandler();
         LoggingHandler loggingHandler = new LoggingHandler();
         // WebSocketClientHandshaker 30s timeout
-        WebSocketClientHandshaker webSocketClientHandshaker = WebSocketClientHandshakerFactory.newHandshaker(addressPort.getUri(), WebSocketVersion.V13, null, true, new DefaultHttpHeaders(), 65536, true, false, 300_000);
-        Aria2HandshakeHandler aria2HandshakeHandler = new Aria2HandshakeHandler(webSocketClientHandshaker);
+        WebSocketClientProtocolHandler webSocketClientProtocolHandler = new WebSocketClientProtocolHandler(addressPort.getUri(), WebSocketVersion.V13, null, true, new DefaultHttpHeaders(), 65536,  false, true,true,300_000);
+        Aria2HandshakeHandler aria2HandshakeHandler = new Aria2HandshakeHandler();
         Aria2MessageHandler aria2MessageHandler = Aria2MessageHandler.newInstance();
         bootstrap
                 .group(workerGroup)
@@ -118,6 +118,7 @@ public class DefaultAria2Client implements Aria2Client{
                                 .addLast("Aria2_HttpClientCodec",new HttpClientCodec())
                                 .addLast("Aria2_HttpObjectAggregator",new HttpObjectAggregator(HTTP_MAX_CONTENT_LENGTH))
                                 .addLast(WebSocketClientCompressionHandler.INSTANCE)
+                                .addLast("WebSocketClientProtocolHandler",webSocketClientProtocolHandler)
                                 .addLast("Aria2HandshakeHandler",aria2HandshakeHandler)
                                 .addLast("Aria2MessageHandler", aria2MessageHandler)
                                 .addLast("Aria2ActionSendHandler", Aria2ActionSendHandler.newInstance())

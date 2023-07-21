@@ -18,6 +18,7 @@ public class AriaManagerTest {
                 "--rpc-secret=2089b05ecca3d829",
                 "--auto-save-interval=30",
                 "--save-session-interval=30",
+                "--log=/home/lee/桌面/aria2-download/aria2.log",
                 "--input-file=/home/lee/桌面/aria2-download/aria2.session",
                 "--save-session=/home/lee/桌面/aria2-download/aria2.session"
         };

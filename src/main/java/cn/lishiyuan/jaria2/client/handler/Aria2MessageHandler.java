@@ -1,6 +1,7 @@
 package cn.lishiyuan.jaria2.client.handler;
 
 import cn.lishiyuan.jaria2.client.event.process.EventProcessor;
+import cn.lishiyuan.jaria2.exception.Aria2ActionException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import cn.lishiyuan.jaria2.client.Aria2Client;
@@ -47,8 +48,7 @@ public class Aria2MessageHandler extends MessageToMessageDecoder<WebSocketFrame>
     @Override
     protected void decode(ChannelHandlerContext ctx, WebSocketFrame webSocketFrame, List<Object> out) throws Exception {
         // 处理数据
-        if(webSocketFrame instanceof TextWebSocketFrame){
-            TextWebSocketFrame textWebSocketFrame = (TextWebSocketFrame) webSocketFrame;
+        if(webSocketFrame instanceof TextWebSocketFrame textWebSocketFrame){
             String text = textWebSocketFrame.text();
             // 封发通知与Action回复
             LOGGER.debug("receive msg: "+text);
@@ -72,10 +72,12 @@ public class Aria2MessageHandler extends MessageToMessageDecoder<WebSocketFrame>
                 LOGGER.debug("receive heartbeat message");
             }
         }else if(webSocketFrame instanceof CloseWebSocketFrame){
+            Aria2Client.CACHE.forEach((key,value)->{
+                value.completeExceptionally(new Aria2ActionException("connection close"));
+            });
+            Aria2Client.CACHE.clear();
             ctx.close();
-            LOGGER.debug("receive close message");
-        }else if (webSocketFrame instanceof PongWebSocketFrame){
-            LOGGER.debug("receive heartbeat message");
+            LOGGER.error("receive close message");
         }
     }
 

@@ -1,31 +1,23 @@
 package cn.lishiyuan.jaria2.client.handler;
 
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
+import io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This Handler is used to handle the websocket handshake. handshake success will remove this handle from pipeline
  */
-public class Aria2HandshakeHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
+public class Aria2HandshakeHandler extends ChannelDuplexHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Aria2HandshakeHandler.class);
-
-    private final WebSocketClientHandshaker webSocketClientHandshaker;
 
     private ChannelPromise handshake;
 
     public ChannelPromise getHandshake() {
         return handshake;
-    }
-
-    public Aria2HandshakeHandler(WebSocketClientHandshaker webSocketClientHandshaker) {
-        this.webSocketClientHandshaker = webSocketClientHandshaker;
     }
 
 
@@ -35,39 +27,22 @@ public class Aria2HandshakeHandler extends SimpleChannelInboundHandler<FullHttpR
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx){
-        ChannelFuture channelFuture = webSocketClientHandshaker.handshake(ctx.channel());
-        channelFuture.addListener(future -> {
-            if(!future.isSuccess()){
-                LOGGER.debug("websocket handshake failure");
-                handshake.setFailure(future.cause());
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if(evt instanceof WebSocketClientProtocolHandler.ClientHandshakeStateEvent){
+            if(evt == WebSocketClientProtocolHandler.ClientHandshakeStateEvent.HANDSHAKE_COMPLETE){
+                LOGGER.info("websocket handshake success");
+                handshake.setSuccess();
+                ctx.pipeline().remove(this);
+            }else if (evt == WebSocketClientProtocolHandler.ClientHandshakeStateEvent.HANDSHAKE_TIMEOUT){
+                LOGGER.info("websocket handshake timeout");
+                handshake.setFailure(new Exception("websocket handshake timeout"));
+            }else if (evt == WebSocketClientProtocolHandler.ClientHandshakeStateEvent.HANDSHAKE_ISSUED) {
+                LOGGER.info("websocket handshake issued");
             }
-        });
-        LOGGER.debug("start aria2 websocket Handshake");
-    }
-
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, FullHttpResponse msg) {
-        /*
-         * if handshake complete ，than set to success for handshake.  this handler will remove from pipeline at final.
-         * else finish handshake first.
-         */
-
-        if(!webSocketClientHandshaker.isHandshakeComplete()){
-            webSocketClientHandshaker.finishHandshake(ctx.channel(),msg);
-            LOGGER.debug("finishHandshake");
-            handshake.setSuccess();
+            return;
         }
 
-        ctx.pipeline().remove(this);
-        LOGGER.info("aria2 websocket Handshake is finished");
+        super.userEventTriggered(ctx, evt);
     }
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        handshake.setFailure(cause);
-        ctx.pipeline().remove(this);
-        LOGGER.info("aria2 websocket Handshake is Failure");
-        super.exceptionCaught(ctx, cause);
-    }
 }
