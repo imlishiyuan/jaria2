@@ -24,7 +24,7 @@ public class Aria2AddressPort{
         this.port = port;
         this.useSSL = useSSL;
         String schema = useSSL ? SCHEMA_SSL : SCHEMA;
-        String uriStr = new StringBuilder(schema).append(address).append(":").append(port).append(PATH).toString();
+        String uriStr = schema + address + ":" + port + PATH;
         this.uri = URI.create(uriStr);
     }
 

@@ -1,13 +1,14 @@
 package cn.lishiyuan.jaria2.client.handler;
 
 import cn.lishiyuan.jaria2.client.action.ListNotificationAction;
+import cn.lishiyuan.jaria2.config.Aria2Config;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.timeout.IdleStateEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -15,19 +16,40 @@ import org.slf4j.LoggerFactory;
  * @author lee
  */
 @ChannelHandler.Sharable
+@Slf4j
 public class Aria2HeartbeatSendHandler extends ChannelDuplexHandler {
+    public static final String HEARTBEAT_ID = "heartbeat";
 
-    public static final String DEFAULT_ACTION_ID = "heartbeat";
+    private final AtomicInteger HEARTBEAT_COUNT = new AtomicInteger(0);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Aria2HeartbeatSendHandler.class);
+    private final int MAX_HEARTBEAT_COUNT;
+
+    public Aria2HeartbeatSendHandler(int maxHeartbeatCount){
+        this.MAX_HEARTBEAT_COUNT = maxHeartbeatCount;
+    }
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-        if(evt == IdleStateEvent.FIRST_WRITER_IDLE_STATE_EVENT && ctx.channel().isActive()){
+        if(evt == IdleStateEvent.WRITER_IDLE_STATE_EVENT && ctx.channel().isActive()){
+            if(HEARTBEAT_COUNT.incrementAndGet() > MAX_HEARTBEAT_COUNT){
+                if (ctx.channel().hasAttr(Aria2Config.Client.ARIA2_CLIENT_ATTRIBUTE_KEY)) {
+                    try {
+                        ctx.channel().attr(Aria2Config.Client.ARIA2_CLIENT_ATTRIBUTE_KEY).get().disconnect();
+                    } catch (InterruptedException e) {
+                        log.error("close channel error", e);
+                    }
+                }
+                HEARTBEAT_COUNT.set(0);
+                return;
+            }
             // send heartbeat
-            ctx.writeAndFlush(new PingWebSocketFrame());
-            LOGGER.debug("send heartbeat message");
+            ctx.writeAndFlush(new ListNotificationAction(HEARTBEAT_ID));
+            log.debug("send heartbeat message");
         }
+    }
+
+    public void receiveHeartbeat(){
+        HEARTBEAT_COUNT.set(0);
     }
 
 }
