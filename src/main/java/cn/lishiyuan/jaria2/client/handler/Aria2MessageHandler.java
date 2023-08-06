@@ -48,7 +48,8 @@ public class Aria2MessageHandler extends MessageToMessageDecoder<WebSocketFrame>
         // 处理数据
         boolean hasAria2Client = ctx.channel().hasAttr(Aria2Config.Client.ARIA2_CLIENT_ATTRIBUTE_KEY);
 
-        if(webSocketFrame instanceof TextWebSocketFrame textWebSocketFrame){
+        if(webSocketFrame instanceof TextWebSocketFrame){
+            TextWebSocketFrame textWebSocketFrame = (TextWebSocketFrame) webSocketFrame;
             String text = textWebSocketFrame.text();
             // 封发通知与Action回复
             log.debug("receive msg: "+text);
