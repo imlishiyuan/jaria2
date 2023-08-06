@@ -8,7 +8,7 @@
 
 1. add maven dependency（引入maven依赖）
 
-now version is : 1.0.1
+now version is : 1.0.4
 
 ```xml
 <dependency>

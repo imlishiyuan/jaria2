@@ -24,12 +24,15 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketCl
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -38,9 +41,10 @@ import java.util.concurrent.atomic.AtomicReference;
  * Default Aria2Client
  * @author lee
  */
+@Slf4j
 public class DefaultAria2Client implements Aria2Client{
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAria2Client.class);
+    private final Map<String,CompletableFuture<String>> CACHE = new WeakHashMap<>(128);
 
     private static final long ZERO = 0L;
     private static final int HTTP_MAX_CONTENT_LENGTH = 8192;
@@ -54,19 +58,16 @@ public class DefaultAria2Client implements Aria2Client{
     private volatile Connector connector;
 
     public DefaultAria2Client(String token){
-        this(Aria2Config.Client.DEFAULT_ADDRESS,Aria2Config.Client.DEFAULT_PORT,token,Aria2Config.Client.DEFAULT_USE_SSL);
-    }
-
-    public DefaultAria2Client(String address, int port,String token,boolean useSSL) {
         Aria2Config aria2Config = new Aria2Config();
         Aria2Config.Client client = new Aria2Config.Client();
-        client.setAddress(address);
-        client.setPort(port);
+        client.setAddress(Aria2Config.Client.DEFAULT_ADDRESS);
+        client.setPort(Aria2Config.Client.DEFAULT_PORT);
         client.setToken(token);
         aria2Config.setClient(client);
         this.aria2Config = aria2Config;
         state = new AtomicReference<>(ConnectStatus.READY);
     }
+
 
     public DefaultAria2Client(Aria2Config config){
         if(Objects.isNull(config) || Objects.isNull(config.getClient())){
@@ -84,16 +85,11 @@ public class DefaultAria2Client implements Aria2Client{
             throw new StatusException("client not ready");
         EventLoopGroup workerGroup = new NioEventLoopGroup(new DefaultThreadFactory("aria2-client"));
         Bootstrap bootstrap = new Bootstrap();
-        final SslContext sslContext;
-        try {
-            sslContext = SslContextBuilder.forClient().build();
-        } catch (SSLException e) {
-            throw new RuntimeException(e.getMessage(),e);
-        }
-        Aria2HeartbeatSendHandler aria2HeartbeatSendHandler = new Aria2HeartbeatSendHandler();
+
+        Aria2HeartbeatSendHandler aria2HeartbeatSendHandler = new Aria2HeartbeatSendHandler(aria2Config.getClient().getHeartbeatMaxTimes());
         LoggingHandler loggingHandler = new LoggingHandler();
         // WebSocketClientHandshaker 30s timeout
-        WebSocketClientProtocolHandler webSocketClientProtocolHandler = new WebSocketClientProtocolHandler(addressPort.getUri(), WebSocketVersion.V13, null, true, new DefaultHttpHeaders(), 65536,  false, true,true,300_000);
+        WebSocketClientProtocolHandler webSocketClientProtocolHandler = new WebSocketClientProtocolHandler(addressPort.getUri(), WebSocketVersion.V13, null, true, new DefaultHttpHeaders(), HTTP_MAX_CONTENT_LENGTH,  false, true,true,Aria2Config.Client.DEFAULT_TIME_UNIT.toMillis(aria2Config.getClient().getConnectTimeout()));
         Aria2HandshakeHandler aria2HandshakeHandler = new Aria2HandshakeHandler();
         Aria2MessageHandler aria2MessageHandler = Aria2MessageHandler.newInstance();
         bootstrap
@@ -108,9 +104,18 @@ public class DefaultAria2Client implements Aria2Client{
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) {
+                        ch.attr(Aria2Config.Client.ARIA2_CLIENT_ATTRIBUTE_KEY).set(DefaultAria2Client.this);
+                        ch.attr(Aria2Config.Client.ARIA2_HEARTBEAT_SEND_HANDLER_ATTRIBUTE_KEY).set(aria2HeartbeatSendHandler);
+
                         ChannelPipeline pipeline = ch.pipeline();
                         if(addressPort.useSSL){
-                            pipeline.addLast("Aria2_SslHandler",sslContext.newHandler(ch.alloc()));
+                            final SslContext sslContext;
+                            try {
+                                sslContext = SslContextBuilder.forClient().sslProvider(SslProvider.OPENSSL).trustManager(new File(aria2Config.getClient().getKeyPath())).build();
+                                pipeline.addLast("Aria2_SslHandler",sslContext.newHandler(ch.alloc()));
+                            } catch (SSLException e) {
+                                throw new RuntimeException(e.getMessage(),e);
+                            }
                         }
                         pipeline
                                 .addLast("Aria2_Logger",loggingHandler)
@@ -133,7 +138,7 @@ public class DefaultAria2Client implements Aria2Client{
 
         if(aria2HandshakeHandler.getHandshake().sync().isSuccess()){
             state.compareAndSet(ConnectStatus.READY,ConnectStatus.CONNECTED);
-            LOGGER.info("connect to {} success",addressPort.getUri());
+            log.info("connect to {} success",addressPort.getUri());
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(()-> {
@@ -142,7 +147,7 @@ public class DefaultAria2Client implements Aria2Client{
                     disconnect();
                 }
             } catch (InterruptedException e) {
-                LOGGER.error(e.getMessage(),e);
+                log.error(e.getMessage(),e);
             }
         }));
     }
@@ -178,7 +183,7 @@ public class DefaultAria2Client implements Aria2Client{
             String actionResponseStr = response.get(aria2Config.getClient().getResponseTimeout(),TimeUnit.SECONDS);
             return action.buildRespFromStr(actionResponseStr);
         }catch (ExecutionException | InterruptedException | TimeoutException e){
-            LOGGER.error("call aria2 error . msg : "+e.getMessage());
+            log.error("call aria2 error . msg : "+e.getMessage());
             throw new Aria2ActionException(e);
         }finally {
             CACHE.remove(action.getId());
@@ -207,23 +212,20 @@ public class DefaultAria2Client implements Aria2Client{
         }
     }
 
+    @Override
+    public Map<String, CompletableFuture<String>> getCache() {
+        return CACHE;
+    }
+
+    @Override
+    public ConnectStatus getStatus() {
+        return state.get();
+    }
+
     /**
      * save connector info
      */
-    private static class Connector{
-        final Bootstrap bootstrap;
-        final EventLoopGroup workerGroup;
-        final Channel channel;
-        final Aria2HandshakeHandler aria2HandshakeHandler;
-
-        final Aria2MessageHandler aria2MessageHandler;
-
-        Connector(Bootstrap bootstrap, EventLoopGroup workerGroup, Aria2HandshakeHandler aria2HandshakeHandler, Aria2MessageHandler aria2MessageHandler,Channel channel){
-            this.workerGroup = workerGroup;
-            this.bootstrap = bootstrap;
-            this.aria2HandshakeHandler = aria2HandshakeHandler;
-            this.aria2MessageHandler = aria2MessageHandler;
-            this.channel = channel;
-        }
-    }
+    private record Connector(Bootstrap bootstrap, EventLoopGroup workerGroup,
+                             Aria2HandshakeHandler aria2HandshakeHandler, Aria2MessageHandler aria2MessageHandler,
+                             Channel channel) {}
 }

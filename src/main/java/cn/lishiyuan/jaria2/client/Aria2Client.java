@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public interface Aria2Client {
 
-    Map<String, CompletableFuture<String>> CACHE = new WeakHashMap<>(128);
+    Map<String, CompletableFuture<String>> getCache();
 
     /**
      * 连接服务
@@ -33,6 +33,8 @@ public interface Aria2Client {
     void addEventProcessor(EventProcessor eventProcessor);
 
     void addEventProcessors(EventProcessor... eventProcessor);
+
+    ConnectStatus getStatus();
 
     /**
      * 调用aria2c

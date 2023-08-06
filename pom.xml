@@ -6,7 +6,7 @@
 
     <groupId>cn.lishiyuan</groupId>
     <artifactId>jaria2</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
 
     <packaging>jar</packaging>
 
@@ -78,6 +78,7 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.36</version>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
